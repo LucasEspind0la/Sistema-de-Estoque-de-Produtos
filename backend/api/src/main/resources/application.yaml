@@ -1,3 +1,8 @@
 spring:
   application:
-    name: api
+    name: estoque
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false

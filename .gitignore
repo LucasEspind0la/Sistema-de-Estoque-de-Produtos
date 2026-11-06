@@ -1,0 +1,43 @@
+# ============================================
+# Arquivos de ambiente e secrets
+# ============================================
+.env
+*.env.local
+.env.*
+
+# Evita commites acidentais
+backend/api/.env
+
+# ============================================
+# Configurações de IDE (locais)
+# ============================================
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ============================================
+# Arquivos de ambiente e secrets
+# ============================================
+.env
+*.env.local
+.env.*
+backend/api/.env
+
+# ============================================
+# Arquivos de compilação e build
+# ============================================
+target/
+bin/
+build/
+*.class
+*.jar
+*.war
+
+# ============================================
+# Arquivos de sistema (OS)
+# ============================================
+.DS_Store
+Thumbs.db
+desktop.ini

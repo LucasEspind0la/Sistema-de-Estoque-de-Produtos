@@ -1,9 +1,15 @@
 services:
   postgres:
-    image: 'postgres:latest'
+    image: postgres:16
+    container_name: estoque-db
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - '5432'
+      - "5432:5432"
+    volumes:
+      - estoque-data:/var/lib/postgresql/data
+
+volumes:
+  estoque-data:
