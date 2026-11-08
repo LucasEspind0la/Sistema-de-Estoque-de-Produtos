@@ -21,7 +21,7 @@ export class ProdutoLista implements OnInit {
     this.carregar();
   }
 
-  protected carregar(): void {
+  carregar(): void {
     this.carregando.set(true);
     this.erro.set(null);
 

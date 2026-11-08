@@ -1,0 +1,29 @@
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+input {
+  padding: 6px 8px;
+}
+
+button {
+  padding: 8px 16px;
+}
+
+.erro {
+  color: #b00020;
+}
+
+.sucesso {
+  color: #1b7a2f;
+}

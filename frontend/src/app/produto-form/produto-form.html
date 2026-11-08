@@ -1,0 +1,33 @@
+<h2>Cadastrar produto</h2>
+
+<form (ngSubmit)="cadastrar()">
+  <label>
+    Nome
+    <input
+      name="nome"
+      type="text"
+      [ngModel]="nome()"
+      (ngModelChange)="nome.set($event)"
+    />
+  </label>
+
+  <label>
+    Preço (R$)
+    <input
+      name="preco"
+      type="number"
+      step="0.01"
+      [ngModel]="preco()"
+      (ngModelChange)="preco.set($event)"
+    />
+  </label>
+
+  <button type="submit" [disabled]="enviando()">Cadastrar</button>
+</form>
+
+@if (erro()) {
+  <p class="erro">{{ erro() }}</p>
+}
+@if (sucesso()) {
+  <p class="sucesso">{{ sucesso() }}</p>
+}
