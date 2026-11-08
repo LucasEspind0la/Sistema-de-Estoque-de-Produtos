@@ -1,0 +1,31 @@
+<h2>Produtos</h2>
+
+@if (carregando()) {
+  <p>Carregando...</p>
+} @else if (erro()) {
+  <p class="erro">{{ erro() }}</p>
+  <button type="button" (click)="carregar()">Tentar de novo</button>
+} @else if (produtos().length === 0) {
+  <p>Nenhum produto cadastrado.</p>
+} @else {
+  <table>
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Nome</th>
+        <th>Preço</th>
+        <th>Quantidade</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (produto of produtos(); track produto.id) {
+        <tr>
+          <td>{{ produto.id }}</td>
+          <td>{{ produto.nome }}</td>
+          <td>{{ produto.preco | currency: 'BRL' }}</td>
+          <td>{{ produto.quantidade }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
