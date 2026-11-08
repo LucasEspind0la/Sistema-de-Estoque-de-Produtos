@@ -8,6 +8,13 @@
 } @else if (produtos().length === 0) {
   <p>Nenhum produto cadastrado.</p>
 } @else {
+  @if (erroMovimento()) {
+    <p class="erro">{{ erroMovimento() }}</p>
+  }
+  @if (sucessoMovimento()) {
+    <p class="sucesso">{{ sucessoMovimento() }}</p>
+  }
+
   <table>
     <thead>
       <tr>
@@ -15,6 +22,7 @@
         <th>Nome</th>
         <th>Preço</th>
         <th>Quantidade</th>
+        <th>Movimentar</th>
       </tr>
     </thead>
     <tbody>
@@ -24,6 +32,11 @@
           <td>{{ produto.nome }}</td>
           <td>{{ produto.preco | currency: 'BRL' }}</td>
           <td>{{ produto.quantidade }}</td>
+          <td class="acoes">
+            <input #qtd type="number" step="1" placeholder="Qtd" />
+            <button type="button" (click)="movimentar(produto, 'entrada', qtd)">Entrada</button>
+            <button type="button" (click)="movimentar(produto, 'saida', qtd)">Saída</button>
+          </td>
         </tr>
       }
     </tbody>
