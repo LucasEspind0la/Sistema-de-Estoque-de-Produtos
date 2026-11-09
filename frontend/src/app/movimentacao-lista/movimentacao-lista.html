@@ -1,0 +1,36 @@
+<h2>Histórico de movimentações</h2>
+
+@if (carregando()) {
+  <p>Carregando...</p>
+} @else if (erro()) {
+  <p class="erro">{{ erro() }}</p>
+  <button type="button" (click)="carregar()">Tentar de novo</button>
+} @else if (movimentacoes().length === 0) {
+  <p>Nenhuma movimentação registrada.</p>
+} @else {
+  <table>
+    <thead>
+      <tr>
+        <th>Data e hora</th>
+        <th>Produto</th>
+        <th>Tipo</th>
+        <th>Quantidade</th>
+        <th>Saldo após</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (m of movimentacoes(); track m.id) {
+        <tr>
+          <td>{{ m.dataHora | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+          <td>{{ m.produtoNome }}</td>
+          <td [class]="m.tipo === 'ENTRADA' ? 'entrada' : 'saida'">
+            {{ m.tipo === 'ENTRADA' ? 'Entrada' : 'Saída' }}
+          </td>
+          <td>{{ m.quantidade }}</td>
+          <td>{{ m.saldoApos }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+  <p class="nota">Mostrando as 100 movimentações mais recentes.</p>
+}

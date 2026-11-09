@@ -2,12 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
+import { Movimentacao } from './movimentacao.model';
 import { Produto } from './produto.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProdutoApi {
   private readonly http = inject(HttpClient);
-  private readonly url = 'http://localhost:8080/produtos';
+  private readonly baseUrl = 'http://localhost:8080';
+  private readonly url = `${this.baseUrl}/produtos`;
 
   listar(): Observable<Produto[]> {
     return this.http.get<Produto[]>(this.url);
@@ -23,5 +25,9 @@ export class ProdutoApi {
 
   saida(id: number, quantidade: number): Observable<Produto> {
     return this.http.post<Produto>(`${this.url}/${id}/saida`, { quantidade });
+  }
+
+  listarMovimentacoes(): Observable<Movimentacao[]> {
+    return this.http.get<Movimentacao[]>(`${this.baseUrl}/movimentacoes`);
   }
 }

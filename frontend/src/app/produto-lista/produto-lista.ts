@@ -1,6 +1,6 @@
 import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, output, signal } from '@angular/core';
 
 import { ProdutoApi } from '../produto-api';
 import { Produto } from '../produto.model';
@@ -15,6 +15,8 @@ type TipoMovimento = 'entrada' | 'saida';
 })
 export class ProdutoLista implements OnInit {
   private readonly api = inject(ProdutoApi);
+
+  readonly movimentado = output<void>();
 
   protected readonly produtos = signal<Produto[]>([]);
   protected readonly carregando = signal(true);
@@ -73,6 +75,7 @@ export class ProdutoLista implements OnInit {
           `${acao} de ${quantidade} em "${atualizado.nome}". Saldo atual: ${atualizado.quantidade}.`,
         );
         campo.value = '';
+        this.movimentado.emit();
       },
       error: (e: HttpErrorResponse) => {
         this.erroMovimento.set(e.error?.erro ?? 'Não foi possível registrar a movimentação.');

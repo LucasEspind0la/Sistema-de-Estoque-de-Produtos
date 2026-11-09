@@ -1,5 +1,6 @@
 <main>
   <h1>Sistema de Estoque</h1>
   <app-produto-form (cadastrado)="lista.carregar()" />
-  <app-produto-lista #lista />
+  <app-produto-lista #lista (movimentado)="historico.carregar()" />
+  <app-movimentacao-lista #historico />
 </main>
