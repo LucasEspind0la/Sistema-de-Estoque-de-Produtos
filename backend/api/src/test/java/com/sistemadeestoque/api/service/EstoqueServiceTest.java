@@ -4,17 +4,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.sistemadeestoque.api.exception.EstoqueInsuficienteException;
 import com.sistemadeestoque.api.exception.ProdutoNaoEncontradoException;
+import com.sistemadeestoque.api.model.Movimentacao;
 import com.sistemadeestoque.api.model.Produto;
+import com.sistemadeestoque.api.model.TipoMovimentacao;
+import com.sistemadeestoque.api.repository.MovimentacaoRepository;
 import com.sistemadeestoque.api.repository.ProdutoRepository;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,6 +29,9 @@ class EstoqueServiceTest {
 
     @Mock
     private ProdutoRepository repository;
+
+    @Mock
+    private MovimentacaoRepository movimentacaoRepository;
 
     @InjectMocks
     private EstoqueService service;
@@ -122,5 +130,61 @@ class EstoqueServiceTest {
         when(repository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(ProdutoNaoEncontradoException.class, () -> service.saida(999L, 1));
+    }
+
+    @Test
+    void entradaRegistraMovimentacaoComSaldoAposAOperacao() {
+        produtoExistente();
+
+        service.entrada(1L, 10);
+
+        ArgumentCaptor<Movimentacao> captor = ArgumentCaptor.forClass(Movimentacao.class);
+        verify(movimentacaoRepository).save(captor.capture());
+        Movimentacao registrada = captor.getValue();
+        assertThat(registrada.getTipo()).isEqualTo(TipoMovimentacao.ENTRADA);
+        assertThat(registrada.getQuantidade()).isEqualTo(10);
+        assertThat(registrada.getSaldoApos()).isEqualTo(10);
+    }
+
+    @Test
+    void saidaRegistraMovimentacaoComSaldoAposAOperacao() {
+        Produto produto = produtoExistente();
+        produto.adicionar(10);
+
+        service.saida(1L, 3);
+
+        ArgumentCaptor<Movimentacao> captor = ArgumentCaptor.forClass(Movimentacao.class);
+        verify(movimentacaoRepository).save(captor.capture());
+        Movimentacao registrada = captor.getValue();
+        assertThat(registrada.getTipo()).isEqualTo(TipoMovimentacao.SAIDA);
+        assertThat(registrada.getQuantidade()).isEqualTo(3);
+        assertThat(registrada.getSaldoApos()).isEqualTo(7);
+    }
+
+    @Test
+    void saidaRecusadaNaoRegistraMovimentacao() {
+        Produto produto = produtoExistente();
+        produto.adicionar(5);
+
+        assertThrows(EstoqueInsuficienteException.class, () -> service.saida(1L, 50));
+
+        verifyNoInteractions(movimentacaoRepository);
+    }
+
+    @Test
+    void entradaInvalidaNaoRegistraMovimentacao() {
+        produtoExistente();
+
+        assertThrows(IllegalArgumentException.class, () -> service.entrada(1L, 0));
+
+        verifyNoInteractions(movimentacaoRepository);
+    }
+
+    @Test
+    void listarMovimentacoesDeProdutoInexistenteLancaExcecao() {
+        when(repository.existsById(999L)).thenReturn(false);
+
+        assertThrows(
+                ProdutoNaoEncontradoException.class, () -> service.listarMovimentacoes(999L));
     }
 }
