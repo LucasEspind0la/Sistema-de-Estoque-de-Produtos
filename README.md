@@ -1,14 +1,15 @@
 # Sistema de Estoque de Produtos
 
-API REST para controle de estoque: cadastro de produtos e registro de entradas e saídas, com regras que impedem saldo negativo.
+Sistema para controle de estoque, com API REST em Java e interface web em Angular: cadastro de produtos, entradas e saídas, com regras que impedem saldo negativo e um histórico de todas as movimentações.
 
-Projeto de estudos para praticar Java, Spring Boot, banco de dados relacional e testes automatizados.
+Projeto de estudos para praticar Java, Spring Boot, banco de dados relacional, Angular e testes automatizados.
 
 ## O que o sistema faz
 
 - Cadastra produtos (nome e preço). Todo produto nasce com quantidade 0.
-- Busca um produto pelo id e lista todos os produtos.
+- Lista todos os produtos e busca um produto pelo id.
 - Registra **entradas** (aumentam o saldo) e **saídas** (diminuem o saldo).
+- Guarda um **histórico de movimentações**: cada entrada e saída registra o produto, o tipo, a quantidade, o saldo depois da operação e a data e hora.
 
 ## Regras de negócio
 
@@ -16,37 +17,104 @@ Projeto de estudos para praticar Java, Spring Boot, banco de dados relacional e 
 - A quantidade de uma entrada ou saída precisa ser **maior que 0** (valores zero ou negativos são recusados).
 - Não é possível retirar **mais do que existe** em estoque.
 - O nome do produto é obrigatório e o preço não pode ser negativo.
+- O saldo e o histórico são gravados na **mesma transação**: se uma das gravações falhar, a outra também é desfeita.
+- Operações recusadas (saldo insuficiente, quantidade inválida) **não geram histórico**.
 
 ## Tecnologias
 
+**Backend**
 - Java 21
 - Spring Boot (Web, Data JPA, Validation)
 - PostgreSQL 16
 - Flyway (versionamento do banco de dados)
-- Docker Compose (para subir o banco)
 - Maven
 - JUnit 5 e Mockito (testes)
 
+**Frontend**
+- Angular 21 e TypeScript
+- Componentes standalone, signals e HttpClient
+
+**Infraestrutura**
+- Docker Compose (para subir o banco de dados)
+
 ## Endpoints
 
-| Método | Rota                     | O que faz                  | Resposta de sucesso |
-|--------|--------------------------|----------------------------|---------------------|
-| POST   | `/produtos`              | Cadastra um produto        | `201 Created`       |
-| GET    | `/produtos`              | Lista todos os produtos    | `200 OK`            |
-| GET    | `/produtos/{id}`         | Busca um produto pelo id   | `200 OK`            |
-| POST   | `/produtos/{id}/entrada` | Registra uma entrada       | `200 OK`            |
-| POST   | `/produtos/{id}/saida`   | Registra uma saída         | `200 OK`            |
+| Método | Rota                       | O que faz                                      | Sucesso       |
+|--------|----------------------------|------------------------------------------------|---------------|
+| POST   | `/produtos`                | Cadastra um produto                            | `201 Created` |
+| GET    | `/produtos`                | Lista todos os produtos                        | `200 OK`      |
+| GET    | `/produtos/{id}`           | Busca um produto pelo id                       | `200 OK`      |
+| POST   | `/produtos/{id}/entrada`   | Registra uma entrada                           | `200 OK`      |
+| POST   | `/produtos/{id}/saida`     | Registra uma saída                             | `200 OK`      |
+| GET    | `/movimentacoes`           | Lista as 100 movimentações mais recentes       | `200 OK`      |
+| GET    | `/movimentacoes?produtoId={id}` | Lista as movimentações de um produto      | `200 OK`      |
 
 ### Erros
 
 Os erros voltam em JSON, no formato `{"erro": "mensagem"}`.
 
-| Situação                                      | Status |
-|-----------------------------------------------|--------|
+| Situação                                                                    | Status            |
+|-----------------------------------------------------------------------------|-------------------|
 | Dados inválidos (nome vazio, preço negativo, quantidade menor ou igual a 0) | `400 Bad Request` |
-| Produto não encontrado                        | `404 Not Found` |
-| Saída maior que o saldo disponível            | `409 Conflict` |
+| Produto não encontrado (inclui `?produtoId=` de um produto inexistente)     | `404 Not Found`   |
+| Saída maior que o saldo disponível                                          | `409 Conflict`    |
 
+### Exemplos
+
+Cadastrar um produto:
+
+```bash
+curl -X POST localhost:8080/produtos \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"Teclado","preco":129.90}'
+```
+
+Resposta:
+
+```json
+{"id":1,"nome":"Teclado","preco":129.90,"quantidade":0}
+```
+
+Registrar uma entrada de 10 unidades:
+
+```bash
+curl -X POST localhost:8080/produtos/1/entrada \
+  -H "Content-Type: application/json" \
+  -d '{"quantidade":10}'
+```
+
+Registrar uma saída de 3 unidades:
+
+```bash
+curl -X POST localhost:8080/produtos/1/saida \
+  -H "Content-Type: application/json" \
+  -d '{"quantidade":3}'
+```
+
+Consultar o histórico de um produto:
+
+```bash
+curl "localhost:8080/movimentacoes?produtoId=1"
+```
+
+Resposta (a movimentação mais recente vem primeiro):
+
+```json
+[
+  {"id":2,"produtoId":1,"produtoNome":"Teclado","tipo":"SAIDA","quantidade":3,"saldoApos":7,"dataHora":"2026-11-09T23:20:34.367339Z"},
+  {"id":1,"produtoId":1,"produtoNome":"Teclado","tipo":"ENTRADA","quantidade":10,"saldoApos":10,"dataHora":"2026-11-09T23:20:34.251664Z"}
+]
+```
+
+## Interface web
+
+A interface em Angular tem uma única página com três partes:
+
+- **Cadastrar produto:** formulário com nome e preço. Mostra as mensagens de erro da API.
+- **Produtos:** tabela com id, nome, preço e quantidade. Cada linha tem um campo de quantidade e os botões **Entrada** e **Saída**.
+- **Histórico de movimentações:** tabela com data e hora, produto, tipo, quantidade e saldo após a operação. Atualiza sozinha a cada entrada ou saída.
+
+As regras de negócio ficam todas no backend. A interface apenas exibe as mensagens que a API devolve.
 
 ## Como rodar
 
@@ -54,24 +122,26 @@ Os erros voltam em JSON, no formato `{"erro": "mensagem"}`.
 
 - Java 21
 - Docker e Docker Compose
+- Node.js 20.19 ou superior (com npm)
 - Git
 
 ### Passo a passo
 
-1. Clone o repositório e entre na pasta da API:
+1. Clone o repositório:
 
 ```bash
 git clone https://github.com/LucasEspind0la/Sistema-de-Estoque-de-Produtos.git
-cd Sistema-de-Estoque-de-Produtos/backend/api
+cd Sistema-de-Estoque-de-Produtos
 ```
 
-2. Crie o arquivo `.env` a partir do exemplo e defina uma senha para o banco:
+2. Entre na pasta da API e crie o arquivo `.env` a partir do exemplo:
 
 ```bash
+cd backend/api
 cp .env.example .env
 ```
 
-Abra o `.env` e preencha:
+Abra o `.env` e defina a senha do banco:
 
 ```
 POSTGRES_DB=estoque
@@ -79,15 +149,17 @@ POSTGRES_USER=estoque
 POSTGRES_PASSWORD=defina-sua-senha-aqui
 ```
 
+O arquivo `.env` não é enviado ao GitHub, por isso cada pessoa cria o seu.
+
 3. Suba o banco de dados:
 
 ```bash
 docker compose up -d
 ```
 
-O banco fica disponível na porta `5433` do seu computador. A tabela `produto` é criada automaticamente pelo Flyway na primeira execução.
+O banco fica disponível na porta `5433` do seu computador. As tabelas são criadas automaticamente pelo Flyway na primeira execução.
 
-4. Rode a aplicação:
+4. Rode a API:
 
 ```bash
 ./mvnw spring-boot:run
@@ -95,44 +167,75 @@ O banco fica disponível na porta `5433` do seu computador. A tabela `produto` �
 
 A API fica disponível em `http://localhost:8080`.
 
-## Testes
-
-Os testes unitários cobrem as regras do `Produto` e do `EstoqueService`:
+5. Em **outro terminal**, rode a interface web:
 
 ```bash
+cd frontend
+npm install
+npm start
+```
+
+Abra `http://localhost:4200` no navegador.
+
+## Testes
+
+Os testes unitários do backend cobrem as regras do `Produto` e do `EstoqueService`, incluindo o registro do histórico:
+
+```bash
+cd backend/api
 ./mvnw test -Dtest='ProdutoTest,EstoqueServiceTest'
 ```
+
+São 26 testes, e eles não precisam do banco de dados.
 
 ## Estrutura do projeto
 
 ```
-backend/api/src/main/java/com/sistemadeestoque/api/
-├── controller/    recebe as requisições HTTP
-├── service/       regras de negócio (EstoqueService)
-├── repository/    acesso ao banco de dados
-├── model/         entidade Produto
-├── dto/           objetos de entrada e saída da API
-└── exception/     exceções e tratamento de erros
-
-backend/api/src/main/resources/
-├── application.yaml
-└── db/migration/  scripts do Flyway (criação das tabelas)
+.
+├── backend/api/
+│   ├── compose.yaml            banco PostgreSQL (Docker)
+│   ├── .env.example            modelo das variáveis do banco
+│   └── src/
+│       ├── main/java/com/sistemadeestoque/api/
+│       │   ├── controller/     ProdutoController, MovimentacaoController
+│       │   ├── service/        EstoqueService (regras de negócio)
+│       │   ├── repository/     acesso ao banco de dados
+│       │   ├── model/          Produto, Movimentacao, TipoMovimentacao
+│       │   ├── dto/            objetos de entrada e saída da API
+│       │   ├── exception/      exceções e tratamento de erros
+│       │   └── config/         CORS (libera o front em localhost:4200)
+│       ├── main/resources/
+│       │   ├── application.yaml
+│       │   └── db/migration/   V1 (produto) e V2 (movimentacao)
+│       └── test/               testes unitários
+└── frontend/
+    └── src/app/
+        ├── produto-form/       formulário de cadastro
+        ├── produto-lista/      tabela de produtos, entrada e saída
+        ├── movimentacao-lista/ histórico de movimentações
+        ├── produto-api.ts      chamadas à API
+        └── *.model.ts          tipos Produto e Movimentacao
 ```
 
 ## Banco de dados
 
 Tabela `produto`:
 
-| Coluna     | Tipo          | Observação                   |
-|------------|---------------|------------------------------|
-| id         | BIGSERIAL     | chave primária               |
-| nome       | VARCHAR(150)  | obrigatório                  |
-| preco      | NUMERIC(10,2) | não pode ser negativo        |
-| quantidade | INTEGER       | começa em 0, nunca negativa  |
+| Coluna     | Tipo          | Observação                  |
+|------------|---------------|-----------------------------|
+| id         | BIGSERIAL     | chave primária              |
+| nome       | VARCHAR(150)  | obrigatório                 |
+| preco      | NUMERIC(10,2) | não pode ser negativo       |
+| quantidade | INTEGER       | começa em 0, nunca negativa |
 
-## Próximos passos
+Tabela `movimentacao`:
 
-- Interface web com Angular
-- Histórico de movimentações (entradas e saídas)
-- Testes de integração com banco de dados
+| Coluna     | Tipo                     | Observação                          |
+|------------|--------------------------|-------------------------------------|
+| id         | BIGSERIAL                | chave primária                      |
+| produto_id | BIGINT                   | chave estrangeira para `produto`    |
+| tipo       | VARCHAR(10)              | `ENTRADA` ou `SAIDA`                |
+| quantidade | INTEGER                  | maior que 0                         |
+| saldo_apos | INTEGER                  | saldo do produto depois da operação |
+| data_hora  | TIMESTAMP WITH TIME ZONE | momento do registro                 |
 
