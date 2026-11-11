@@ -33,6 +33,7 @@ Projeto de estudos para praticar Java, Spring Boot, banco de dados relacional, A
 **Frontend**
 - Angular 21 e TypeScript
 - Componentes standalone, signals e HttpClient
+- Vitest (testes)
 
 **Infraestrutura**
 - Docker Compose (para subir o banco de dados)
@@ -179,6 +180,8 @@ Abra `http://localhost:4200` no navegador.
 
 ## Testes
 
+### Backend
+
 O backend tem dois tipos de teste:
 
 - **Testes unitários** (`ProdutoTest` e `EstoqueServiceTest`): cobrem as regras de negócio e o registro do histórico, com o banco simulado.
@@ -190,6 +193,18 @@ cd backend/api
 ```
 
 São 33 testes. Os de integração precisam do Docker em execução, mas não usam o banco de desenvolvimento nem o arquivo `.env`.
+
+### Frontend
+
+Os testes do frontend usam Vitest e o `HttpTestingController` do Angular, que simula a API. Por isso não precisam do backend nem do banco de dados. Cobrem o serviço de acesso à API, o formulário de cadastro, a lista de produtos (entrada e saída), o histórico e a página completa, incluindo a atualização entre os componentes.
+
+```bash
+cd frontend
+npm install
+npm test -- --watch=false
+```
+
+São 25 testes.
 
 ## Estrutura do projeto
 
