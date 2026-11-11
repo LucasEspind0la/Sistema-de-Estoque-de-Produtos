@@ -28,7 +28,7 @@ Projeto de estudos para praticar Java, Spring Boot, banco de dados relacional, A
 - PostgreSQL 16
 - Flyway (versionamento do banco de dados)
 - Maven
-- JUnit 5 e Mockito (testes)
+- JUnit 5, Mockito e Testcontainers (testes)
 
 **Frontend**
 - Angular 21 e TypeScript
@@ -179,14 +179,17 @@ Abra `http://localhost:4200` no navegador.
 
 ## Testes
 
-Os testes unitários do backend cobrem as regras do `Produto` e do `EstoqueService`, incluindo o registro do histórico:
+O backend tem dois tipos de teste:
+
+- **Testes unitários** (`ProdutoTest` e `EstoqueServiceTest`): cobrem as regras de negócio e o registro do histórico, com o banco simulado.
+- **Testes de integração** (`EstoqueIntegrationTest`): sobem a aplicação inteira com um PostgreSQL de verdade, em um container temporário (Testcontainers), e chamam os endpoints. Verificam também as migrações do Flyway.
 
 ```bash
 cd backend/api
-./mvnw test -Dtest='ProdutoTest,EstoqueServiceTest'
+./mvnw test
 ```
 
-São 26 testes, e eles não precisam do banco de dados.
+São 33 testes. Os de integração precisam do Docker em execução, mas não usam o banco de desenvolvimento nem o arquivo `.env`.
 
 ## Estrutura do projeto
 
@@ -207,7 +210,7 @@ São 26 testes, e eles não precisam do banco de dados.
 │       ├── main/resources/
 │       │   ├── application.yaml
 │       │   └── db/migration/   V1 (produto) e V2 (movimentacao)
-│       └── test/               testes unitários
+│       └── test/               testes unitários e de integração
 └── frontend/
     └── src/app/
         ├── produto-form/       formulário de cadastro
