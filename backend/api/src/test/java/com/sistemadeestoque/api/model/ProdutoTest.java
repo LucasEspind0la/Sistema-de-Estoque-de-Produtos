@@ -75,4 +75,24 @@ class ProdutoTest {
 
         assertThat(produto.getQuantidade()).isEqualTo(5);
     }
+
+    @Test
+    void valorEmEstoqueEhZeroQuandoNaoHaQuantidade() {
+        assertThat(produto.getValorEmEstoque()).isEqualByComparingTo("0");
+    }
+
+    @Test
+    void valorEmEstoqueEhPrecoVezesQuantidade() {
+        produto.adicionar(3);
+
+        assertThat(produto.getValorEmEstoque()).isEqualByComparingTo("389.70");
+    }
+
+    @Test
+    void valorEmEstoqueAcompanhaAsSaidas() {
+        produto.adicionar(10);
+        produto.remover(7);
+
+        assertThat(produto.getValorEmEstoque()).isEqualByComparingTo("389.70");
+    }
 }

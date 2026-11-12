@@ -1,1 +1,77 @@
-/* You can add global styles to this file, and also import other style files */
+@import '@fontsource/barlow/latin-400.css';
+@import '@fontsource/barlow/latin-500.css';
+@import '@fontsource/barlow/latin-600.css';
+@import '@fontsource/barlow-semi-condensed/latin-500.css';
+@import '@fontsource/barlow-semi-condensed/latin-600.css';
+@import '@fontsource/barlow-semi-condensed/latin-700.css';
+
+:root {
+  --nevoa: #f4f5f6;
+  --papel: #ffffff;
+  --grafite: #2b2e33;
+  --pedra: #646a73;
+  --linha: #dfe2e6;
+  --entrada: #2f7d5b;
+  --saida: #b4423a;
+  --mudou: #fcefc0;
+
+  --fonte-texto: 'Barlow', system-ui, sans-serif;
+  --fonte-titulo: 'Barlow Semi Condensed', 'Barlow', system-ui, sans-serif;
+
+  --raio: 6px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: var(--nevoa);
+  color: var(--grafite);
+  font: 400 1rem/1.5 var(--fonte-texto);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+h1 {
+  font-size: 1.25rem;
+}
+
+h2 {
+  margin-bottom: 1rem;
+  font-size: 1.125rem;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--grafite);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

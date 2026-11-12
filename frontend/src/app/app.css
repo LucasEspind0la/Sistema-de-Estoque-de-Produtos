@@ -1,0 +1,36 @@
+.topo {
+  background: var(--papel);
+  border-bottom: 1px solid var(--linha);
+}
+
+.topo .conteudo {
+  padding-block: 14px;
+}
+
+.conteudo {
+  max-width: 1040px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+main {
+  padding-block: 8px 48px;
+}
+
+app-produto-form,
+app-produto-lista,
+app-movimentacao-lista {
+  display: block;
+  padding-block: 28px;
+  border-top: 1px solid var(--linha);
+}
+
+app-produto-form {
+  border-top: none;
+}
+
+@media (max-width: 600px) {
+  .conteudo {
+    padding-inline: 16px;
+  }
+}

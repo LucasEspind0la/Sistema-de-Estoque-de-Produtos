@@ -39,6 +39,11 @@ public class Produto {
     public BigDecimal getPreco() { return preco; }
     public int getQuantidade() { return quantidade; }
 
+    // derivado: não é gravado no banco, é calculado a cada consulta
+    public BigDecimal getValorEmEstoque() {
+        return preco.multiply(BigDecimal.valueOf(quantidade));
+    }
+
     public void adicionar(int qtd) {
         validar(qtd);
         this.quantidade += qtd;

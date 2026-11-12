@@ -180,4 +180,19 @@ class EstoqueIntegrationTest {
                 .andExpect(jsonPath("$[0].produtoNome").value("Mouse"))
                 .andExpect(jsonPath("$[1].produtoNome").value("Teclado"));
     }
+
+    @Test
+    void respostaDoProdutoTrazOValorEmEstoque() throws Exception {
+        Produto produto = criarProduto("Teclado");
+
+        mockMvc.perform(get("/produtos/" + produto.getId()))
+                .andExpect(jsonPath("$.valorEmEstoque").value(0.0));
+
+        movimentar(produto.getId(), "entrada", 3)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.valorEmEstoque").value(389.7));
+
+        mockMvc.perform(get("/produtos"))
+                .andExpect(jsonPath("$[0].valorEmEstoque").value(389.7));
+    }
 }
